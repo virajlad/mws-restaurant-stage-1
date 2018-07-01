@@ -15,7 +15,9 @@ body {
 ul, li {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 10pt;
-	color: #333;
+  color: #333;
+  /* To use full width on wide displays */
+  display: inline-block;
 }
 a {
 	color: orange;
@@ -50,20 +52,22 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 }
 /* ====================== Navigation ====================== */
 nav {
-  width: 100%;
-  height: 80px;
+  width: calc(100vw - 2em);
+  height: 60px;
   background-color: #252831;
   text-align:center;
+  padding: 1em;
 }
 nav h1 {
   margin: auto;
 }
 nav h1 a {
   color: #fff;
-  font-size: 14pt;
-  font-weight: 200;
-  letter-spacing: 10px;
+  font-size: 1.5em;
+  font-weight: bolder;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-align: center;
 }
 #breadcrumb {
     padding: 10px 40px 16px;
@@ -105,17 +109,32 @@ nav h1 a {
 }
 /* ====================== Restaurant Filtering ====================== */
 .filter-options {
-  width: 100%;
-  height: 50px;
+  width: calc(100vw - 2em);
+  height: 4em;
   background-color: #3397DB;
   align-items: center;
+  padding: 1em;
+  display: flex;
+  flex-wrap: wrap;
 }
+
+@media screen and (max-width:470px) {
+  .filter-options {
+    height: 8em;
+  }
+
+  nav h1 a {
+    font-size: 1.2em;
+  }
+}
+
 .filter-options h2 {
   color: white;
   font-size: 1rem;
   font-weight: normal;
   line-height: 1;
   margin: 0 20px;
+  display: block;
 }
 .filter-options select {
   background-color: white;
@@ -136,6 +155,7 @@ nav h1 a {
   margin: 0;
   padding: 30px 15px 60px;
   text-align: center;
+  width: calc(100% - 30px);
 }
 #restaurants-list li {
   background-color: #fff;
