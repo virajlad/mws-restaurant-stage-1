@@ -201,7 +201,7 @@ nav h1 a {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 2000;
 }
 .inside #map-container {
   background: blue none repeat scroll 0 0;
@@ -308,34 +308,31 @@ nav h1 a {
     flex-wrap: wrap;
   }
 
-  .inside #map {
-    height: 100%;
-  }
-
   #breadcrumb {
-    width: 100%;
+    width: 100vw;
   }
 
   .inside #map-container {
-    height: 50%;
-    width: 100%;
+    height: 50vw;
+    width: 100vw;
     margin-top: 3em;
     order: 1;
+    position: absolute;
   }
 
   #restaurant-container {
-    width: 100%;
+    width: 100vw;
     order: 2;
   } 
 
   #reviews-container {
-    width: 100%;
+    width: 100vw;
     order: 3;
   }
 
   .inside #footer {
     bottom: 0;
     position: absolute;
-    width: calc(100% - 50px);
+    width: calc(100vw - 50px);
   }
 }
