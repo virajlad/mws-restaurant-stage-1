@@ -238,7 +238,7 @@ nav h1 a {
   line-height: 1.1;
 }
 #restaurant-img {
-	width: 90%;
+	width: 100%;
 }
 #restaurant-address {
   font-size: 12pt;
@@ -254,7 +254,7 @@ nav h1 a {
   padding: 2px 0;
   text-align: center;
   text-transform: uppercase;
-	width: 90%;
+	width: 100%;
 }
 #restaurant-container, #reviews-container {
   border-bottom: 1px solid #d9d9d9;
@@ -306,8 +306,15 @@ nav h1 a {
 }
 
 @media screen and (max-width:600px) {
+  h1 {
+    font-weight: 100;
+    letter-spacing: 1pt;
+    font-size: 1.2em;
+  }
+  
   nav {
     height: 3em;
+    letter-spacing: 0.5em;
   }
   
   #main-content {
@@ -336,6 +343,7 @@ nav h1 a {
 
   #reviews-container {
     box-sizing: border-box;
+    padding: 0 20px;
     width: 100vw;
     order: 3;
   }
