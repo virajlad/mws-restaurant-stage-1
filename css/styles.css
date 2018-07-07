@@ -121,6 +121,7 @@ nav h1 a {
   padding: 1em;
   display: flex;
   flex-wrap: wrap;
+  text-align: center;
 }
 
 #restaurant-details {
@@ -132,7 +133,7 @@ nav h1 a {
   font-size: 1rem;
   font-weight: normal;
   line-height: 1;
-  margin: 0 20px;
+  margin: auto;
   display: block;
 }
 .filter-options select {
