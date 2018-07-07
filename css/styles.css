@@ -332,6 +332,15 @@ nav h1 a {
   nav h1 a {
     font-size: 1.2em;
   }
+  
+  #restaurants-list li {
+    width: 90%;
+    box-sizing: border-box;
+  }
+  
+  #restaurants-list li a{
+    margin-left: 0px; 
+  }
 }
 
 @media screen and (max-width:600px) {
