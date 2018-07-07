@@ -12,6 +12,11 @@ body {
 	margin: 0;
 	position:relative;
 }
+
+div {
+  width: 100vw;
+}
+
 ul, li {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 10pt;
@@ -279,7 +284,8 @@ nav h1 a {
   overflow: hidden;
   padding: 0 20px 20px;
   position: relative;
-  width: 85%;
+  width: 100%;
+  box-sizing: border-box;
 }
 #reviews-list li p {
   margin: 0 0 10px;
@@ -321,11 +327,14 @@ nav h1 a {
   }
 
   #restaurant-container {
+    box-sizing: border-box;
+    margin-top: 50%;
     width: 100vw;
     order: 2;
   } 
 
   #reviews-container {
+    box-sizing: border-box;
     width: 100vw;
     order: 3;
   }
@@ -333,6 +342,6 @@ nav h1 a {
   .inside #footer {
     bottom: 0;
     position: absolute;
-    width: calc(100vw - 50px);
+    width: 90%;
   }
 }
