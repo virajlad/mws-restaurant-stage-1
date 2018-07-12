@@ -44,13 +44,11 @@ self.addEventListener('fetch', function(event) {
 
   event.respondWith(
     fetch(event.request).then(function(response){
-      if (response.status === 200) {
         var clone = response.clone();
         caches.open(staticCacheName).then(function(cache){
           cache.put(requestUrl, clone);
         });
         return response;
-      } 
     }).catch(function(){
       return caches.match(event.request);
     }) 
