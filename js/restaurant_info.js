@@ -76,6 +76,14 @@ fetchRestaurantFromURL = (callback) => {
   }
 }
 
+
+setImageNameSuffix = (url, suffix) => {
+  let path = url.substr(0, url.lastIndexOf('.'));
+  let ext = url.substr(url.lastIndexOf('.'));
+  let newPath = path + suffix + ext;
+  return newPath;
+}
+
 /**
  * Create restaurant HTML and add it to the webpage
  */
@@ -85,10 +93,27 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
-
+  
   const image = document.getElementById('restaurant-img');
-  image.className = 'restaurant-img'
+  image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+
+  const picture = document.createElement('picture');
+  picture.classList.add(image.className);
+
+  const sourceMedium = document.createElement('source');
+  sourceMedium.setAttribute('media','(max-width: 600px)');
+  sourceMedium.setAttribute('srcset',setImageNameSuffix(image.src, '-800_large'));
+
+  const sourceSmall = document.createElement('source');
+  sourceSmall.setAttribute('media','(max-width: 470px)');
+  sourceSmall.setAttribute('srcset',setImageNameSuffix(image.src, '-300_small'));
+
+  picture.appendChild(sourceSmall);
+  picture.appendChild(sourceMedium);
+  picture.appendChild(image.cloneNode());
+
+  image.parentNode.replaceChild(picture, image);
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;

@@ -157,6 +157,13 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   addMarkersToMap();
 }
 
+setImageNameSuffix = (url, suffix) => {
+  let path = url.substr(0, url.lastIndexOf('.'));
+  let ext = url.substr(url.lastIndexOf('.'));
+  let newPath = path + suffix + ext;
+  return newPath;
+}
+
 /**
  * Create restaurant HTML.
  */
@@ -165,7 +172,10 @@ createRestaurantHTML = (restaurant) => {
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  
+  let defaultPath = DBHelper.imageUrlForRestaurant(restaurant);
+  image.src = setImageNameSuffix(defaultPath, '-300_small');
+  image.setAttribute('alt-text','Picture of restaurant ' + restaurant.name);
   li.append(image);
 
   const name = document.createElement('h1');
@@ -184,9 +194,9 @@ createRestaurantHTML = (restaurant) => {
   more.innerHTML = 'View Details';
   more.setAttribute('aria-label','View details of ' + restaurant.name);
   more.href = DBHelper.urlForRestaurant(restaurant);
-  li.append(more)
+  li.append(more);
 
-  return li
+  return li;
 }
 
 /**
