@@ -1,6 +1,10 @@
 let restaurant;
 var newMap;
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js');
+}
+
 /**
  * Initialize map as soon as the page is loaded.
  */
