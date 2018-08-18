@@ -3,6 +3,7 @@ var browserify = require('browserify');
 var sass = require('gulp-sass');
 var autoprefixer = require('gulp-autoprefixer');
 var source  = require('vinyl-source-stream');
+var webp = require('gulp-webp');
 
 gulp.task('browserify-sw', function() {
     return browserify('./service-worker_raw.js')
@@ -21,3 +22,9 @@ gulp.task('styles', function(){
         }))
     .pipe(gulp.dest('./css/'))
 });
+
+gulp.task('webp', () =>
+    gulp.src('raw_images/*.jpg')
+        .pipe(webp())
+        .pipe(gulp.dest('raw_images'))
+);
