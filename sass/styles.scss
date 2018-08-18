@@ -359,7 +359,7 @@ nav h1 a {
   }
 
   #breadcrumb {
-    width: 100vw;
+    width: calc(100vw - 50px);
   }
 
   .inside #map-container {
