@@ -4,6 +4,8 @@ var sass = require('gulp-sass');
 var autoprefixer = require('gulp-autoprefixer');
 var source  = require('vinyl-source-stream');
 var webp = require('gulp-webp');
+var gulp = require('gulp');
+var $ = require('gulp-load-plugins')();
 
 gulp.task('browserify-sw', function() {
     return browserify('./service-worker_raw.js')
@@ -12,7 +14,7 @@ gulp.task('browserify-sw', function() {
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('default', ['browserify-sw','styles']);
+gulp.task('default', ['browserify-sw','styles', 'copy_images', 'responsive_images']);
 
 gulp.task('styles', function(){
    gulp.src('sass/**/*.scss')
@@ -28,3 +30,27 @@ gulp.task('webp', () =>
         .pipe(webp())
         .pipe(gulp.dest('raw_images'))
 );
+
+gulp.task('responsive_images', function () {
+  return gulp.src('raw_images/*.webp')
+    .pipe($.responsive({
+      '*.webp': [{
+        quality: 100,
+        width: 300,
+        rename: { suffix: '-300_small' },
+      }, {
+        quality: 80,
+        width: 800,
+        rename: { suffix: '-800_large' },
+      }],
+    }, {
+      quality: 100,
+      withMetadata: false,
+    }))
+    .pipe(gulp.dest('img'));
+});
+
+gulp.task('copy_images', function(){
+    return gulp.src('raw_images/*.webp')
+    .pipe(gulp.dest('img'))
+});
