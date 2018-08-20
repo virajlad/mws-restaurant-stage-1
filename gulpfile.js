@@ -5,6 +5,7 @@ var autoprefixer = require('gulp-autoprefixer');
 var source  = require('vinyl-source-stream');
 var webp = require('gulp-webp');
 var $ = require('gulp-load-plugins')();
+var csso = require('gulp-csso');
 
 gulp.task('browserify-sw', function() {
     return browserify('./service-worker_raw.js')
@@ -21,6 +22,7 @@ gulp.task('styles', function(){
     .pipe(autoprefixer({
             browsers: ['last 2 versions']
         }))
+    .pipe(csso())
     .pipe(gulp.dest('./css/'))
 });
 
