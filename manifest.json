@@ -1,0 +1,41 @@
+{
+    "name": "Restaurant Reviews",
+    "short_name": "Reviews",
+    "icons": [{
+        "src": "img/AppIcon.svg",
+        "type": "image/svg",
+        "sizes": "48x48"
+    },{
+        "src": "img/AppIcon.svg",
+        "type": "image/svg",
+        "sizes": "96x96"
+    },{
+        "src": "img/AppIcon.svg",
+        "type": "image/svg",
+        "sizes": "128x128"
+    },{
+        "src": "img/AppIcon.svg",
+        "type": "image/svg",
+        "sizes": "144x144"
+    },{
+        "src": "img/AppIcon.svg",
+        "type": "image/svg",
+        "sizes": "192x192"
+    },{
+        "src": "img/AppIcon.svg",
+        "type": "image/svg",
+        "sizes": "256x256"
+    },{
+        "src": "img/AppIcon.svg",
+        "type": "image/svg",
+        "sizes": "384x384"
+    },{
+        "src": "img/AppIcon.svg",
+        "type": "image/svg",
+        "sizes": "512x512"
+    }],
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "black",
+    "theme_color": "black"
+}

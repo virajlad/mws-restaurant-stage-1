@@ -385,6 +385,6 @@ nav h1 a {
   }
 
   .inside #footer {
-    width: 90%;
+    width: calc(100vw - 50px);
   }
 }

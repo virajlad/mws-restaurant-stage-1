@@ -4,7 +4,6 @@ var sass = require('gulp-sass');
 var autoprefixer = require('gulp-autoprefixer');
 var source  = require('vinyl-source-stream');
 var webp = require('gulp-webp');
-var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 
 gulp.task('browserify-sw', function() {
@@ -51,6 +50,6 @@ gulp.task('responsive_images', function () {
 });
 
 gulp.task('copy_images', function(){
-    return gulp.src('raw_images/*.webp')
+    return gulp.src('raw_images/*.{webp,svg}')
     .pipe(gulp.dest('img'))
 });
