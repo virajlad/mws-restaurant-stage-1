@@ -62,7 +62,7 @@ function getDataFromIDB(relativePath) {
 
 function getAllRestaurantsDataFromIDB() {
   return dbPromise.then(function(db) {
-    let tx = dbPromise.transaction(OBJECT_STORE_NAME);
+    let tx = db.transaction(OBJECT_STORE_NAME);
     let store = tx.objectStore(OBJECT_STORE_NAME);
     
     return store.getAll();
@@ -71,7 +71,7 @@ function getAllRestaurantsDataFromIDB() {
 
 function getRestaurantDataByIdFromIDB(id) {
   return dbPromise.then(function(db) {
-    let tx = dbPromise.transaction(OBJECT_STORE_NAME);
+    let tx = db.transaction(OBJECT_STORE_NAME);
     let store = tx.objectStore(OBJECT_STORE_NAME);
     
     return store.get(id);
@@ -104,12 +104,13 @@ function putAllRestaurantsDataInIDB(restaurants) {
 self.addEventListener('fetch', function(event) {
   let requestUrl = new URL(event.request.url);
   let isRestaurantDataUrl = requestUrl.pathname.startsWith(`/restaurants`);
+  let isMapBoxUrl = requestUrl.pathname.includes(`leaflet@`) || requestUrl.pathname.includes(`mapbox.streets`);
 
   event.respondWith(
     fetch(event.request).then(function(response){
         var clone = response.clone();
         
-        if (!isRestaurantDataUrl) {
+        if (!isRestaurantDataUrl && !isMapBoxUrl) {
           caches.open(staticCacheName).then(function(cache){
             cache.put(requestUrl, clone);
           });
@@ -123,7 +124,8 @@ self.addEventListener('fetch', function(event) {
         return caches.match(event.request);
       } else {
         // Get data from IDB
-        return getDataFromIDB(requestUrl.pathname);
+        var resp = new Response(getDataFromIDB(requestUrl.pathname));
+        return resp;
       }
     }) 
   );
