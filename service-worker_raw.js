@@ -104,7 +104,7 @@ function putAllRestaurantsDataInIDB(restaurants) {
 self.addEventListener('fetch', function(event) {
   let requestUrl = new URL(event.request.url);
   let isRestaurantDataUrl = requestUrl.pathname.startsWith(`/restaurants`);
-  let isMapBoxUrl = requestUrl.pathname.includes(`leaflet@`) || requestUrl.pathname.includes(`mapbox.streets`);
+  let isMapBoxUrl = requestUrl.pathname.includes(`unpkg.com`) || requestUrl.pathname.includes(`mapbox.streets`);
 
   event.respondWith(
     fetch(event.request).then(function(response){
@@ -124,8 +124,9 @@ self.addEventListener('fetch', function(event) {
         return caches.match(event.request);
       } else {
         // Get data from IDB
-        var resp = new Response(getDataFromIDB(requestUrl.pathname));
-        return resp;
+        return getDataFromIDB(requestUrl.pathname).then(data => {
+          return new Response(JSON.stringify(data));
+        });
       }
     }) 
   );
