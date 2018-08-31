@@ -6,6 +6,8 @@ var source  = require('vinyl-source-stream');
 var webp = require('gulp-webp');
 var $ = require('gulp-load-plugins')();
 var csso = require('gulp-csso');
+var babel = require('gulp-babel');
+var uglify = require('gulp-uglify');
 
 gulp.task('browserify-sw', function() {
     return browserify('./service-worker_raw.js')
@@ -14,7 +16,8 @@ gulp.task('browserify-sw', function() {
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('default', ['browserify-sw','styles', 'copy_images', 'responsive_images']);
+gulp.task('default', ['browserify-sw','styles', 'dev-scripts', 'copy_images', 'responsive_images']);
+gulp.task('prod', ['browserify-sw','styles', 'prod-scripts','copy_images', 'responsive_images']);
 
 gulp.task('styles', function(){
    gulp.src('sass/**/*.scss')
@@ -54,4 +57,21 @@ gulp.task('responsive_images', function () {
 gulp.task('copy_images', function(){
     return gulp.src('raw_images/*.{webp,svg}')
     .pipe(gulp.dest('img'))
+});
+
+gulp.task('dev-scripts', function(){
+    return gulp.src('raw_js/**/*.js')
+      .pipe(babel({
+           presets: ['es2015']
+          }))
+      .pipe(gulp.dest('./js'));
+});
+
+gulp.task('prod-scripts', function(){
+    return gulp.src('raw_js/**/*.js')
+      .pipe(babel({
+           presets: ['es2015']
+          }))
+      .pipe(uglify())
+      .pipe(gulp.dest('./js'));
 });
