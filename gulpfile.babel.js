@@ -61,13 +61,13 @@ gulp.task('copy_images', function(){
 
 gulp.task('dev-scripts', function(){
     return gulp.src('raw_js/**/*.js')
-      .pipe(babel())
+      // .pipe(babel())
       .pipe(gulp.dest('./js'));
 });
 
 gulp.task('prod-scripts', function(){
     return gulp.src('raw_js/**/*.js')
-      .pipe(babel())
+      // .pipe(babel())
       .pipe(uglify())
       .pipe(gulp.dest('./js'));
 });
