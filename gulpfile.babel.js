@@ -68,6 +68,8 @@ gulp.task('dev-scripts', function(){
 gulp.task('prod-scripts', function(){
     return gulp.src('raw_js/**/*.js')
       // .pipe(babel())
-      .pipe(uglify())
+      // .pipe(uglify())
       .pipe(gulp.dest('./js'));
 });
+
+// TODO : Fix transpiling & minification issues
