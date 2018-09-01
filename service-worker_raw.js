@@ -120,7 +120,9 @@ self.addEventListener('fetch', function(event) {
         }
         return response;
     }).catch(function(){
-      if (!isRestaurantDataUrl) {
+      if (isMapBoxUrl) {
+        return new Response();
+      } else if (!isRestaurantDataUrl) {
         return caches.match(event.request);
       } else {
         // Get data from IDB
