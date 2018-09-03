@@ -3,4 +3,4 @@ css/
 img/
 node_modules/
 service-worker.js
-./*.html
+*.html
