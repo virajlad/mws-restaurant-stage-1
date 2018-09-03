@@ -8,6 +8,8 @@ var $ = require('gulp-load-plugins')();
 var csso = require('gulp-csso');
 var babel = require('gulp-babel');
 var uglify = require('gulp-uglify');
+var inlinesource = require('gulp-inline-source');
+var gulpsequence = require('gulp-sequence');
 
 gulp.task('browserify-sw', function() {
     return browserify('./service-worker_raw.js')
@@ -15,9 +17,6 @@ gulp.task('browserify-sw', function() {
         .pipe(source('service-worker.js'))
         .pipe(gulp.dest('./'));
 });
-
-gulp.task('default', ['browserify-sw','styles', 'dev-scripts', 'copy_images', 'responsive_images']);
-gulp.task('prod', ['browserify-sw','styles', 'prod-scripts','copy_images', 'responsive_images']);
 
 gulp.task('styles', function(){
    gulp.src('sass/**/*.scss')
@@ -72,4 +71,16 @@ gulp.task('prod-scripts', function(){
       .pipe(gulp.dest('./js'));
 });
 
+gulp.task('inline-source', function(){
+  var options = {
+    compress: false
+  };
+
+  return gulp.src('./raw_html/*.html')
+    .pipe(inlinesource(options))
+    .pipe(gulp.dest('./'));
+});
+
+gulp.task('default', gulpsequence(['browserify-sw','styles', 'dev-scripts', 'copy_images', 'responsive_images'],'inline-source'));
+gulp.task('prod', gulpsequence(['browserify-sw','styles', 'prod-scripts','copy_images', 'responsive_images'], 'inline-source'));
 // TODO : Fix transpiling & minification issues
