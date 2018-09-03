@@ -110,13 +110,19 @@ self.addEventListener('fetch', function(event) {
     fetch(event.request).then(function(response){
         var clone = response.clone();
         
-        if (!isRestaurantDataUrl && !isMapBoxUrl) {
+        if (isMapBoxUrl) {
+          return response;
+        }
+
+        if (!isRestaurantDataUrl) {
           caches.open(staticCacheName).then(function(cache){
             cache.put(requestUrl, clone);
           });
         } else {
           // Put restaurant data in IDB
-          clone.json().then(restaurantData => putRestaurantDataInIDB(requestUrl.pathname,restaurantData));
+          clone.json()
+          .then(restaurantData => putRestaurantDataInIDB(requestUrl.pathname,restaurantData))
+          .catch(error => console.log);
         }
         return response;
     }).catch(function(){

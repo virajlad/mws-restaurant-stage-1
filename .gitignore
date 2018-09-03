@@ -2,3 +2,4 @@ js/
 css/
 img/
 node_modules/
+service-worker.js
