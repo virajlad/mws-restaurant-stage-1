@@ -9,14 +9,15 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    // return `http://localhost:${port}/restaurants`;
+    return `https://dataserver-virajlad713884.codeanyapp.com/`;
   }
 
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-      fetch(DBHelper.DATABASE_URL).then( response => {
+      fetch(DBHelper.DATABASE_URL + 'restaurants').then( response => {
         if (response.status === 200) {
           response.json().then( restaurants => callback(null, restaurants));
         } else {
@@ -31,13 +32,27 @@ class DBHelper {
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
-    fetch(DBHelper.DATABASE_URL+`/${id}`).then(response => {
+    fetch(DBHelper.DATABASE_URL + 'restaurants' +`/${id}`).then(response => {
       if (response.status === 200) {
         response.json().then(restaurant => callback(null, restaurant));
       } else {
         callback('Restaurant does not exist', null);
       }
     })
+  }
+  
+    /**
+   * Fetch a reviews for restaurant by its ID.
+   */
+  static fetchReviewsForRestaurantById(id, callback) {
+    // fetch all restaurants with proper error handling.
+    fetch(DBHelper.DATABASE_URL+`reviews/?restaurant_id=${id}`).then(response => {
+      if (response.status === 200) {
+        return response.json().then(reviews => callback(null, reviews));
+      } else {
+        return callback('Error occurred while retrieving reviews for restaurant', null);
+      }
+    });
   }
 
   /**
