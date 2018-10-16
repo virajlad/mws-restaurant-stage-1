@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
+  <link rel="stylesheet" href="../css/styles.css" inline>
+  <title>Write Review</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="black">
+</head>
+
+<body>
+  <header>
+    <nav>
+        <h1><a href="/">Restaurant Reviews</a></h1>
+    </nav>
+  </header>
+
+  <main id="maincontent">
+      <form>
+          <label>User name : </label><input id="username-input" type="text" name="user-name"/><br/>
+          <label>Rating (out of 5) : </label><input type="number" id="rating-input" name="rating" min="0" max="5" maxlength="1" size="2"/><br/>
+          <label>Review : </label></br><textarea name="review" id="review-input" rows="5" cols="50"></textarea><br/>
+          <input id="submit-review-button" type="button" value="Submit review"/><input type="reset" value="Reset form"/>
+      </form>
+  </main>
+  <script type="application/javascript" charset="utf-8" src="../js/dbhelper.js" inline></script>
+  <script type="application/javascript" charset="utf-8" src="../js/main.js" inline></script>
+  <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initMap"></script> -->
+
+
+  <footer id="footer">
+    Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
+  </footer>
+
+</body>
+
+</html>
