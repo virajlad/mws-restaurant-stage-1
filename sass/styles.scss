@@ -190,7 +190,7 @@ nav h1 a {
   margin: 0;
   font-size: 11pt;
 }
-#restaurants-list li a {
+#restaurants-list li a, #write-review-button {
   background-color: orange;
   border-bottom: 3px solid #eee;
   color: #fff;
@@ -336,7 +336,7 @@ nav h1 a {
     box-sizing: border-box;
   }
   
-  #restaurants-list li a{
+  #restaurants-list li a, #write-review-button{
     margin-left: 0px; 
   }
 }
