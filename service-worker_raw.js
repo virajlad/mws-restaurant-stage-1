@@ -3,9 +3,11 @@ var idb = require('idb');
 
 let DBNAME = 'restaurant';
 let OBJECT_STORE_NAME = 'restaurantStore';
+let REVIEWS_OBJECT_STORE_NAME = 'reviewsStore';
 
 var dbPromise = idb.open(DBNAME, 1, function (upgradeDB){
   var restaurantStore = upgradeDB.createObjectStore(OBJECT_STORE_NAME, {keyPath: 'id'});
+  var reviewsStore = upgradeDB.createObjectStore(REVIEWS_OBJECT_STORE_NAME, {keyPath: 'id'});
 });
 
 self.addEventListener('install', function(event) {
@@ -50,6 +52,7 @@ var cacheResponseAndReturn = function(response) {
 function getDataFromIDB(relativePath) {
   let regexGetAllRestaurants = new RegExp('\/restaurants\/*$');
   let regexGetRestaurantById = new RegExp('\/restaurants\/[0-9]+$');
+  let regexGetReviewsByRestaurantId = new RegExp('\/reviews\/?restaurantId=[0-9]+$');
   
   if (regexGetAllRestaurants.test(relativePath)) {
     return getAllRestaurantsDataFromIDB();
@@ -57,6 +60,10 @@ function getDataFromIDB(relativePath) {
     let regexId = /[0-9]+/;
     let id = Number(relativePath.match(regexId)[0]);
     return getRestaurantDataByIdFromIDB(id);
+  } else if(regexGetReviewsByRestaurantId.test(relativePath)) {
+    let regexId = /[0-9]+/;
+    let id = Number(relativePath.match(regexId)[0]);
+    return getReviewForRestaurantByIdFromIDB(id);
   }
 }
 
@@ -78,10 +85,20 @@ function getRestaurantDataByIdFromIDB(id) {
   });
 }
 
+function getReviewForRestaurantByIdFromIDB(id) {
+  return dbPromise.then(function(db) {
+    let tx = db.transaction(REVIEWS_OBJECT_STORE_NAME);
+    let store = tx.objectStore(REVIEWS_OBJECT_STORE_NAME);
+    
+    return store.get(id);
+  });
+}
+
 
 function putRestaurantDataInIDB(relativePath, data) {
   let regexGetAllRestaurants = new RegExp('\/restaurants\/*$');
   let regexGetRestaurantById = new RegExp('\/restaurants\/[0-9]+$');
+  let regexGetReviewsByRestaurantId = new RegExp('\/reviews\/?restaurantId=[0-9]+$');
   
   if (regexGetAllRestaurants.test(relativePath)) {
     putAllRestaurantsDataInIDB(data);
@@ -89,6 +106,10 @@ function putRestaurantDataInIDB(relativePath, data) {
     let restaurantArray = [];
     restaurantArray.push(data);
     putAllRestaurantsDataInIDB(restaurantArray);
+  } else if(regexGetReviewsByRestaurantId.test(relativePath)) {
+    let reviewsArray = [];
+    reviewsArray.push(data);
+    putAllReviewsDataInIDB(restaurantArray);
   }
 }
 
@@ -101,9 +122,19 @@ function putAllRestaurantsDataInIDB(restaurants) {
   });
 }
 
+function putAllReviewsDataInIDB(reviews) {
+  return dbPromise.then(function(db) {
+    let tx = db.transaction(REVIEWS_OBJECT_STORE_NAME,'readwrite');
+    let store = tx.objectStore(REVIEWS_OBJECT_STORE_NAME);
+    
+    reviews.forEach(review => store.put(review));
+  });
+}
+
 self.addEventListener('fetch', function(event) {
   let requestUrl = new URL(event.request.url);
   let isRestaurantDataUrl = requestUrl.pathname.startsWith(`/restaurants`);
+  let isReviewsUrl = requestUrl.pathname.startsWith(`/reviews`);
   let isMapBoxUrl = requestUrl.pathname.includes(`unpkg.com`) || requestUrl.pathname.includes(`mapbox.streets`);
 
   event.respondWith(
@@ -114,27 +145,28 @@ self.addEventListener('fetch', function(event) {
           return response;
         }
 
-        if (!isRestaurantDataUrl) {
-          caches.open(staticCacheName).then(function(cache){
-            cache.put(requestUrl, clone);
-          });
-        } else {
+        if (isRestaurantDataUrl || isReviewsUrl) {
           // Put restaurant data in IDB
           clone.json()
           .then(restaurantData => putRestaurantDataInIDB(requestUrl.pathname,restaurantData))
           .catch(error => console.log);
+        } else {
+          caches.open(staticCacheName).then(function(cache){
+            cache.put(requestUrl, clone);
+          });
         }
+        
         return response;
     }).catch(function(){
       if (isMapBoxUrl) {
         return new Response();
-      } else if (!isRestaurantDataUrl) {
-        return caches.match(event.request);
-      } else {
+      } else if (isRestaurantDataUrl || isReviewsUrl){
         // Get data from IDB
         return getDataFromIDB(requestUrl.pathname).then(data => {
           return new Response(JSON.stringify(data));
         });
+      } else {
+        return caches.match(event.request);
       }
     }) 
   );

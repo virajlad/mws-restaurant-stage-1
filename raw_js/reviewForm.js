@@ -3,6 +3,10 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js');
 }
 
+navigator.serviceWorker.ready.then(function(swRegistration) {
+  return swRegistration.sync.register('syncOutbox');
+});
+
 function getUrlParameter(name) {
     name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -12,7 +16,6 @@ function getUrlParameter(name) {
 
 document.getElementById('submit-review-button').addEventListener('click', function(){
     if (getUrlParameter('restaurantId')) {
-      alert('Restaurant Id : ' + getUrlParameter('restaurantId'));
       let restaurantId = getUrlParameter('restaurantId');
       let userName = document.getElementById("username-input").value;
       let rating = document.getElementById("rating-input").value;
