@@ -1,10 +1,9 @@
-
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js');
 }
 
 navigator.serviceWorker.ready.then(function(swRegistration) {
-  return swRegistration.sync.register('syncOutbox');
+  return swRegistration.sync.register('syncReviewsOutbox');
 });
 
 function getUrlParameter(name) {
@@ -16,19 +15,37 @@ function getUrlParameter(name) {
 
 document.getElementById('submit-review-button').addEventListener('click', function(){
     if (getUrlParameter('restaurantId')) {
-      let restaurantId = getUrlParameter('restaurantId');
+      let restaurantId = Number(getUrlParameter('restaurantId'));
       let userName = document.getElementById("username-input").value;
-      let rating = document.getElementById("rating-input").value;
+      let rating = Number(document.getElementById("rating-input").value);
       let review = document.getElementById("review-input").value;
+      let createdAt = new Date().toISOString();
       
       let reviewData = {
         "restaurant_id": restaurantId,
         "name": userName,
         "rating": rating,
-        "comments": review
+        "comments": review,
+        "createdAt": createdAt,
+        "updatedAt": createdAt
       };
-      
-      postData(DBHelper.DATABASE_URL + `reviews/`, reviewData).then(data => alert(JSON.stringify(data)));
+
+      let message = {
+        "targetUrl" : DBHelper.DATABASE_URL,
+        "type" : "review",
+        "data" : reviewData
+      };
+
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(function(swRegistration) {
+          navigator.serviceWorker.controller.postMessage(message);
+          swRegistration.sync.register('syncReviewsOutbox');
+          window.location.href = `/restaurant.html?id=${restaurantId}`;
+          return;
+        });
+      } else {
+        postData(DBHelper.DATABASE_URL + `reviews/`, reviewData).then(data => alert(JSON.stringify(data)));
+      }
       
     } else {
       alert('Something went wrong. Redirecting to home page');

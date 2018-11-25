@@ -166,7 +166,6 @@ fillReviewsHTML = function() {
     const writeReviewButton = document.createElement('a');
     writeReviewButton.id = 'write-review-button';
     writeReviewButton.innerHTML = 'Write review';
-    console.log('RestaurantId : ' + restaurantId);
     writeReviewButton.href = '/reviewForm.html?restaurantId=' + restaurantId;
     container.appendChild(writeReviewButton)
   
