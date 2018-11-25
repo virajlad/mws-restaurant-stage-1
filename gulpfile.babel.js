@@ -81,6 +81,16 @@ gulp.task('inline-source', function(){
     .pipe(gulp.dest('./'));
 });
 
+gulp.task('copy-html', function(){
+  var options = {
+    compress: false
+  };
+
+  return gulp.src('./raw_html/*.html')
+    .pipe(gulp.dest('./'));
+});
+
 gulp.task('default', gulpsequence(['browserify-sw','styles', 'dev-scripts', 'copy_images', 'responsive_images'],'inline-source'));
+gulp.task('local', gulpsequence(['browserify-sw','styles', 'dev-scripts'],'copy-html'));
 gulp.task('prod', gulpsequence(['browserify-sw','styles', 'prod-scripts','copy_images', 'responsive_images'], 'inline-source'));
 // TODO : Fix transpiling & minification issues
