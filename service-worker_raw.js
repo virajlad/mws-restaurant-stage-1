@@ -19,6 +19,38 @@ var dbPromise = idb.open(DBNAME, 1, function (upgradeDB){
   let favoriteOutbox = upgradeDB.createObjectStore(FAVORITE_OUTBOX_STORE, { keyPath : 'restaurant_id' });
 });
 
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+    caches.open(staticCacheName).then(function(cache) {
+      return cache.addAll([
+        'css/',
+        'data/',
+        'img/',
+        'js/dbhelper.js',
+        'js/main.js',
+        'js/restaurant_info.js'
+      ]);
+    })
+  );
+});
+
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    self.clients.claim().then(function(){
+      return caches.keys().then(function(cacheNames) {
+        return Promise.all(
+          cacheNames.filter(function(cacheName) {
+            return cacheName.startsWith('restaurant-reviews') &&
+                   cacheName != staticCacheName;
+          }).map(function(cacheName) {
+            return caches.delete(cacheName);
+          })
+        );
+      })
+    })
+  );
+});
+
 self.addEventListener('message', function(event){
 
   let messageType = event.data.type;
@@ -32,14 +64,16 @@ self.addEventListener('message', function(event){
       writeReviewToLocalDB(data);
       break;
     case 'favorite' :
-      markRestaurantFavorite(data.restaurant_id, data.isFavorite);
+      markRestaurantFavorite(data);
   }
 });
 
 self.addEventListener('sync', function(event) {
   if (event.tag == 'syncReviewsOutbox') {
     event.waitUntil(syncReviews());
-  }
+  } else if (event.tag == 'syncFavoriteOutbox') {
+    event.waitUntil(syncFavorites());
+  } 
 });
 
 function postData(url = ``, data = {}) {
@@ -56,6 +90,24 @@ function postData(url = ``, data = {}) {
         redirect: "follow", // manual, *follow, error
         referrer: "no-referrer", // no-referrer, *client
         body: JSON.stringify(data), // body data type must match "Content-Type" header
+    })
+    .then(response => response.json()); // parses response to JSON
+}
+
+function putData(url = ``/*, data = {}*/) {
+  // Default options are marked with *
+    return fetch(url, {
+        method: "PUT", // *GET, POST, PUT, DELETE, etc.
+        // mode: "cors", // no-cors, cors, *same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        // credentials: "same-origin", // include, same-origin, *omit
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            // "Content-Type": "application/x-www-form-urlencoded",
+        },
+        redirect: "follow", // manual, *follow, error
+        referrer: "no-referrer", // no-referrer, *client
+        //body: JSON.stringify(data), // body data type must match "Content-Type" header
     })
     .then(response => response.json()); // parses response to JSON
 }
@@ -92,40 +144,67 @@ function syncReviews() {
     ).catch(function(err) { console.error(err); })})
   }
 
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open(staticCacheName).then(function(cache) {
-      return cache.addAll([
-        'css/',
-        'data/',
-        'img/',
-        'js/dbhelper.js',
-        'js/main.js',
-        'js/restaurant_info.js'
-      ]);
-    })
-  );
-});
-
-function markRestaurantFavorite(restaurantId, isFavorite) {
-  // Store request in IDB
-  console.log('NOT IMPLEMENTED : Mark restaurant with id ' + restaurantId + ' as favorite ' + isFavorite);
-}
-
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.filter(function(cacheName) {
-          return cacheName.startsWith('restaurant-reviews') &&
-                 cacheName != staticCacheName;
-        }).map(function(cacheName) {
-          return caches.delete(cacheName);
+  function syncFavorites() {
+    console.log('Syncing favorites');
+    return dbPromise.then(function(db) {
+      console.log('Reading outbox');
+      let tx = db.transaction(FAVORITE_OUTBOX_STORE);
+      let store = tx.objectStore(FAVORITE_OUTBOX_STORE);
+      
+      return store.getAll();
+    }).then(function(favorites) {
+      console.log('Favorites from outbox : ' + JSON.stringify(favorites));
+      return Promise.all(favorites.map(function(favorite) {
+        console.log('Current favorite :' + JSON.stringify(favorite));
+        let localId = favorite.restaurant_id;
+        return putData(`http://localhost:1337/restaurants/${favorite.restaurant_id}?is_favorite=${favorite.isFavorite}`).then(function(data) {
+          if (Number(data.id)) {
+            console.log('Wrote favorite & got response :' + JSON.stringify(data));
+            return dbPromise.then(function(db) {
+              let tx = db.transaction(OBJECT_STORE_NAME, 'readwrite');
+              let store = tx.objectStore(OBJECT_STORE_NAME);
+              console.log('Updating restaurant');
+              return store.put(data);
+            }).then(function(){
+              dbPromise.then(function(db){
+                let txDel = db.transaction(FAVORITE_OUTBOX_STORE, 'readwrite');
+                let storeDel = txDel.objectStore(FAVORITE_OUTBOX_STORE);
+                console.log('Clearing outbox');
+                return storeDel.delete(localId);
+              });
+            });
+          } else {
+            throw new Error('Error syncing local favorite');
+          }
         })
-      );
+      })
+      ).catch(function(err) { console.error(err); })})
+    }
+
+function markRestaurantFavorite(favoriteData) {
+  // Store request in IDB
+  return dbPromise.then(function(db) {
+    let tx = db.transaction(FAVORITE_OUTBOX_STORE,'readwrite');
+    let store = tx.objectStore(FAVORITE_OUTBOX_STORE);
+    
+    store.put(favoriteData);
+  }).then(function(){
+    return dbPromise.then(function(db) {
+      let tx = db.transaction(OBJECT_STORE_NAME);
+      let store = tx.objectStore(OBJECT_STORE_NAME);
+      
+      return store.get(favoriteData.restaurant_id);
     })
-  );
-});
+  }).then(function(restaurant){
+      restaurant['is_favorite'] = favoriteData.isFavorite;
+      return dbPromise.then(function(db) {
+        let tx = db.transaction(OBJECT_STORE_NAME, 'readwrite');
+        let store = tx.objectStore(OBJECT_STORE_NAME);
+        store.put(restaurant);
+      });
+  });
+  
+}
 
 var cacheResponseAndReturn = function(response) {
   var clone = response.clone();

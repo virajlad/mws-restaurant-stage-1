@@ -181,6 +181,17 @@ createRestaurantHTML = (restaurant) => {
   name.innerHTML = restaurant.name;
   li.append(name);
 
+  let favoriteText = '♡';
+  if (restaurant.is_favorite == 'true') {
+    favoriteText = '♥';
+  }
+
+  const favorite = document.createElement('div');
+  favorite.classList.add(`favorite-symbol`);
+  favorite.setAttribute('data-restaurant', restaurant.id);
+  favorite.innerHTML = `${favoriteText}`;
+  li.append(favorite);
+
   const neighborhood = document.createElement('p');
   neighborhood.innerHTML = restaurant.neighborhood;
   li.append(neighborhood);
@@ -196,6 +207,71 @@ createRestaurantHTML = (restaurant) => {
   li.append(more);
 
   return li;
+}
+
+function toggleRestaurantFavorite(element) {
+  let favoriteDiv = element;
+  
+  if (favoriteDiv.innerHTML == '♡') {
+    favoriteDiv.innerHTML = '♥';
+  } else {
+    favoriteDiv.innerHTML = '♡';
+  }
+}
+
+window.onload = function() {
+  let favoriteElements = document.getElementsByClassName("favorite-symbol");
+
+  Array.from(favoriteElements).forEach(function(element){
+    element.addEventListener('click', function(){
+      // Create and call a function to write to outbox
+      let restaurantId = Number(this.dataset.restaurant);
+      let isFavorite = this.innerHTML == '♡' ? true : false;
+
+      let favoriteData = {
+        "restaurant_id": restaurantId,
+        "isFavorite": isFavorite
+      };
+
+      let message = {
+        "type" : "favorite",
+        "data" : favoriteData
+      };
+      // Fire a sync event
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(function(swRegistration) {
+          navigator.serviceWorker.controller.postMessage(message);
+          swRegistration.sync.register('syncFavoriteOutbox');
+          return;
+        });
+      } else {
+        putData(``).then(data => alert(JSON.stringify(data)));
+      }
+      toggleRestaurantFavorite(this);
+    });
+  });
+}
+
+navigator.serviceWorker.ready.then(function(swRegistration) {
+  return swRegistration.sync.register('syncFavoriteOutbox');
+});
+
+function postData(url = ``, data = {}) {
+  // Default options are marked with *
+    return fetch(url, {
+        method: "PUT", // *GET, POST, PUT, DELETE, etc.
+        // mode: "cors", // no-cors, cors, *same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        // credentials: "same-origin", // include, same-origin, *omit
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            // "Content-Type": "application/x-www-form-urlencoded",
+        },
+        redirect: "follow", // manual, *follow, error
+        referrer: "no-referrer", // no-referrer, *client
+        body: JSON.stringify(data), // body data type must match "Content-Type" header
+    })
+    .then(response => response.json()); // parses response to JSON
 }
 
 /**
