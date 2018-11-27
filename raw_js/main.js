@@ -8,6 +8,15 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js');
 }
 
+navigator.serviceWorker.ready.then(function(swRegistration) {
+  let message = {
+    "type" : "dbUrl",
+    "data" : DBHelper.DATABASE_URL
+  };
+  navigator.serviceWorker.controller.postMessage(message);
+  return swRegistration.sync.register('syncFavoriteOutbox');
+});
+
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
@@ -245,16 +254,12 @@ window.onload = function() {
           return;
         });
       } else {
-        putData(``).then(data => alert(JSON.stringify(data)));
+        putData(`${DBHelper.DATABASE_URL}`).then(data => alert(JSON.stringify(data)));
       }
       toggleRestaurantFavorite(this);
     });
   });
 }
-
-navigator.serviceWorker.ready.then(function(swRegistration) {
-  return swRegistration.sync.register('syncFavoriteOutbox');
-});
 
 function postData(url = ``, data = {}) {
   // Default options are marked with *

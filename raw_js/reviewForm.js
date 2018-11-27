@@ -3,6 +3,11 @@ if ('serviceWorker' in navigator) {
 }
 
 navigator.serviceWorker.ready.then(function(swRegistration) {
+  let message = {
+    "type" : "dbUrl",
+    "data" : DBHelper.DATABASE_URL
+  };
+  navigator.serviceWorker.controller.postMessage(message);
   return swRegistration.sync.register('syncReviewsOutbox');
 });
 
@@ -31,7 +36,6 @@ document.getElementById('submit-review-button').addEventListener('click', functi
       };
 
       let message = {
-        "targetUrl" : DBHelper.DATABASE_URL,
         "type" : "review",
         "data" : reviewData
       };

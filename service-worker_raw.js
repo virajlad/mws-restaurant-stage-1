@@ -6,6 +6,7 @@ let OBJECT_STORE_NAME = 'restaurantStore';
 let REVIEWS_OBJECT_STORE_NAME = 'reviewsStore';
 let REVIEWS_OUTBOX_STORE = 'reviewsOutbox';
 let FAVORITE_OUTBOX_STORE = 'favoriteOutbox';
+let DB_URL = '';
 
 var dbPromise = idb.open(DBNAME, 1, function (upgradeDB){
   var restaurantStore = upgradeDB.createObjectStore(OBJECT_STORE_NAME, {keyPath: 'id'});
@@ -20,17 +21,15 @@ var dbPromise = idb.open(DBNAME, 1, function (upgradeDB){
 });
 
 self.addEventListener('install', function(event) {
-  event.waitUntil(
+  event.waitUntil(self.skipWaiting().then(
     caches.open(staticCacheName).then(function(cache) {
       return cache.addAll([
         'css/',
         'data/',
         'img/',
-        'js/dbhelper.js',
-        'js/main.js',
-        'js/restaurant_info.js'
+        'js/'
       ]);
-    })
+    }))
   );
 });
 
@@ -54,17 +53,20 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('message', function(event){
 
   let messageType = event.data.type;
-  let targetUrl = event.data.targetUrl;
   let data = event.data.data;
   
   // 1. Write it into IDB
   switch (messageType) {
     case 'review' :
-      data['toBeSynced'] = true;
       writeReviewToLocalDB(data);
       break;
     case 'favorite' :
       markRestaurantFavorite(data);
+      break;
+    case 'dbUrl' :
+      DB_URL = data;
+      console.log(DB_URL);
+      break;
   }
 });
 
@@ -96,6 +98,7 @@ function postData(url = ``, data = {}) {
 
 function putData(url = ``/*, data = {}*/) {
   // Default options are marked with *
+    console.log(url);
     return fetch(url, {
         method: "PUT", // *GET, POST, PUT, DELETE, etc.
         // mode: "cors", // no-cors, cors, *same-origin
@@ -122,7 +125,7 @@ function syncReviews() {
     return Promise.all(reviews.map(function(review) {
       let localId = review.id;
       delete review['id'];
-      return postData(`http://localhost:1337/reviews`, review).then(function(data) {
+      return postData(`${DB_URL}/reviews`, review).then(function(data) {
         if (Number(data.id)) {
           return dbPromise.then(function(db) {
             let tx = db.transaction(REVIEWS_OBJECT_STORE_NAME, 'readwrite');
@@ -145,31 +148,24 @@ function syncReviews() {
   }
 
   function syncFavorites() {
-    console.log('Syncing favorites');
     return dbPromise.then(function(db) {
-      console.log('Reading outbox');
       let tx = db.transaction(FAVORITE_OUTBOX_STORE);
       let store = tx.objectStore(FAVORITE_OUTBOX_STORE);
       
       return store.getAll();
     }).then(function(favorites) {
-      console.log('Favorites from outbox : ' + JSON.stringify(favorites));
       return Promise.all(favorites.map(function(favorite) {
-        console.log('Current favorite :' + JSON.stringify(favorite));
         let localId = favorite.restaurant_id;
-        return putData(`http://localhost:1337/restaurants/${favorite.restaurant_id}?is_favorite=${favorite.isFavorite}`).then(function(data) {
+        return putData(`${DB_URL}/restaurants/${favorite.restaurant_id}?is_favorite=${favorite.isFavorite}`).then(function(data) {
           if (Number(data.id)) {
-            console.log('Wrote favorite & got response :' + JSON.stringify(data));
             return dbPromise.then(function(db) {
               let tx = db.transaction(OBJECT_STORE_NAME, 'readwrite');
               let store = tx.objectStore(OBJECT_STORE_NAME);
-              console.log('Updating restaurant');
               return store.put(data);
             }).then(function(){
               dbPromise.then(function(db){
                 let txDel = db.transaction(FAVORITE_OUTBOX_STORE, 'readwrite');
                 let storeDel = txDel.objectStore(FAVORITE_OUTBOX_STORE);
-                console.log('Clearing outbox');
                 return storeDel.delete(localId);
               });
             });
