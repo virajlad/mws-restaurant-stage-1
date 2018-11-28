@@ -90,7 +90,7 @@ gulp.task('copy-html', function(){
     .pipe(gulp.dest('./'));
 });
 
-gulp.task('default', gulpsequence(['browserify-sw','styles', 'dev-scripts', 'copy_images', 'responsive_images']/*,'inline-source'*/));
+gulp.task('default', gulpsequence(['browserify-sw','styles', 'dev-scripts', 'copy_images', 'responsive_images'], 'copy-html'/*,'inline-source'*/));
 gulp.task('local', gulpsequence(['browserify-sw','styles', 'dev-scripts'],'copy-html'));
 gulp.task('prod', gulpsequence(['browserify-sw','styles', 'prod-scripts','copy_images', 'responsive_images'], 'inline-source'));
 // TODO : Fix transpiling & minification issues
