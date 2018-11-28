@@ -2,19 +2,18 @@
 ---
 #### _Three Stage Course Material Project - Restaurant Reviews_
 
-## Project Overview: Stage 2
+## Project Overview: Stage 3
 
-For the **Restaurant Reviews** projects, you will incrementally convert a static webpage to a mobile-ready web application. In **Stage One**, you will take a static design that lacks accessibility and convert the design to be responsive on different sized displays and accessible for screen reader use. You will also add a service worker to begin the process of creating a seamless offline experience for your users.
+Restaurant reviews home page displays a list of restaurants which can be filtered by neighborhood & cuisine. 'View Details' button takes us to see the detailed information of that restaurant.
 
-### Specification
-
-You have been provided the code for a restaurant reviews website. The code has a lot of issues. It’s barely usable on a desktop browser, much less a mobile device. It also doesn’t include any standard accessibility features, and it doesn’t work offline at all. Your job is to update the code to resolve these issues while still maintaining the included functionality. 
+Restaurant info page shows the location of restaurant on map, its hours & reviews by users.
+This page also has a 'Write review' button which users can use to share their experience. 
 
 ### What do I do from here?
 
-1. This project uses a [Data server](https://github.com/udacity/mws-restaurant-stage-2). Follow the instructions in the README for that repository to get the data server running. 
+1. This project uses a [Data server](https://github.com/virajlad/mws-restaurant-stage-3). Follow the instructions in the README for that repository to get the data server running. 
 
-2. In this folder, run `npm install` to install node module dependencies.
+2. Clone the [Web server](https://github.com/virajlad/mws-restaurant-stage-1). In this folder, run `npm install` to install node module dependencies.
 
 3. Run `gulp` to apply other required transforms. e.g. it will generate resized images for responsive webpages, apply CSS & JS transforms.
 
