@@ -6,7 +6,7 @@ let OBJECT_STORE_NAME = 'restaurantStore';
 let REVIEWS_OBJECT_STORE_NAME = 'reviewsStore';
 let REVIEWS_OUTBOX_STORE = 'reviewsOutbox';
 let FAVORITE_OUTBOX_STORE = 'favoriteOutbox';
-let DB_URL = '';
+let DB_URL = 'http://localhost:1337/';
 
 var dbPromise = idb.open(DBNAME, 1, function (upgradeDB){
   var restaurantStore = upgradeDB.createObjectStore(OBJECT_STORE_NAME, {keyPath: 'id'});
@@ -63,10 +63,9 @@ self.addEventListener('message', function(event){
     case 'favorite' :
       markRestaurantFavorite(data);
       break;
-    case 'dbUrl' :
-      DB_URL = data;
-      console.log(DB_URL);
-      break;
+    // case 'dbUrl' :
+    //   DB_URL = data;
+    //   break;
   }
 });
 
@@ -98,7 +97,6 @@ function postData(url = ``, data = {}) {
 
 function putData(url = ``/*, data = {}*/) {
   // Default options are marked with *
-    console.log(url);
     return fetch(url, {
         method: "PUT", // *GET, POST, PUT, DELETE, etc.
         // mode: "cors", // no-cors, cors, *same-origin
@@ -125,7 +123,7 @@ function syncReviews() {
     return Promise.all(reviews.map(function(review) {
       let localId = review.id;
       delete review['id'];
-      return postData(`${DB_URL}/reviews`, review).then(function(data) {
+      return postData(`${DB_URL}reviews`, review).then(function(data) {
         if (Number(data.id)) {
           return dbPromise.then(function(db) {
             let tx = db.transaction(REVIEWS_OBJECT_STORE_NAME, 'readwrite');
@@ -156,7 +154,7 @@ function syncReviews() {
     }).then(function(favorites) {
       return Promise.all(favorites.map(function(favorite) {
         let localId = favorite.restaurant_id;
-        return putData(`${DB_URL}/restaurants/${favorite.restaurant_id}?is_favorite=${favorite.isFavorite}`).then(function(data) {
+        return putData(`${DB_URL}restaurants/${favorite.restaurant_id}?is_favorite=${favorite.isFavorite}`).then(function(data) {
           if (Number(data.id)) {
             return dbPromise.then(function(db) {
               let tx = db.transaction(OBJECT_STORE_NAME, 'readwrite');

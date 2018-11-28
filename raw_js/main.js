@@ -13,7 +13,10 @@ navigator.serviceWorker.ready.then(function(swRegistration) {
     "type" : "dbUrl",
     "data" : DBHelper.DATABASE_URL
   };
-  navigator.serviceWorker.controller.postMessage(message);
+
+  if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage(message);
+  }
   return swRegistration.sync.register('syncFavoriteOutbox');
 });
 
@@ -137,6 +140,40 @@ updateRestaurants = () => {
   })
 }
 
+function registerFavoriteSymbolClick() {
+  let favoriteElements = document.getElementsByClassName("favorite-symbol");
+  Array.from(favoriteElements).forEach(function(element){
+    element.addEventListener('click', function(){
+      // Create and call a function to write to outbox
+      let restaurantId = Number(this.dataset.restaurant);
+      let isFavorite = this.innerHTML == '♡';
+
+      let favoriteData = {
+        "restaurant_id": restaurantId,
+        "isFavorite": isFavorite
+      };
+
+      let message = {
+        "type" : "favorite",
+        "data" : favoriteData
+      };
+      // Fire a sync event
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(function(swRegistration) {
+          navigator.serviceWorker.controller.postMessage(message);
+          swRegistration.sync.register('syncFavoriteOutbox');
+          return;
+        });
+      } else {
+        putData(`${DBHelper.DATABASE_URL}`).then(data => alert(JSON.stringify(data)));
+      }
+      toggleRestaurantFavorite(this);
+    });
+  });
+}
+
+document.onload = window.onload = registerFavoriteSymbolClick();
+
 /**
  * Clear current restaurants, their HTML and remove their map markers.
  */
@@ -163,6 +200,7 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
     ul.append(createRestaurantHTML(restaurant));
   });
   addMarkersToMap();
+  registerFavoriteSymbolClick();
 }
 
 setImageNameSuffix = (url, suffix) => {
@@ -191,11 +229,11 @@ createRestaurantHTML = (restaurant) => {
   li.append(name);
 
   let favoriteText = '♡';
-  if (restaurant.is_favorite == 'true') {
+  if (restaurant.is_favorite == 'true' || restaurant.is_favorite == true) {
     favoriteText = '♥';
   }
 
-  const favorite = document.createElement('div');
+  const favorite = document.createElement('span');
   favorite.classList.add(`favorite-symbol`);
   favorite.setAttribute('data-restaurant', restaurant.id);
   favorite.innerHTML = `${favoriteText}`;
@@ -226,39 +264,6 @@ function toggleRestaurantFavorite(element) {
   } else {
     favoriteDiv.innerHTML = '♡';
   }
-}
-
-window.onload = function() {
-  let favoriteElements = document.getElementsByClassName("favorite-symbol");
-
-  Array.from(favoriteElements).forEach(function(element){
-    element.addEventListener('click', function(){
-      // Create and call a function to write to outbox
-      let restaurantId = Number(this.dataset.restaurant);
-      let isFavorite = this.innerHTML == '♡' ? true : false;
-
-      let favoriteData = {
-        "restaurant_id": restaurantId,
-        "isFavorite": isFavorite
-      };
-
-      let message = {
-        "type" : "favorite",
-        "data" : favoriteData
-      };
-      // Fire a sync event
-      if (navigator.serviceWorker) {
-        navigator.serviceWorker.ready.then(function(swRegistration) {
-          navigator.serviceWorker.controller.postMessage(message);
-          swRegistration.sync.register('syncFavoriteOutbox');
-          return;
-        });
-      } else {
-        putData(`${DBHelper.DATABASE_URL}`).then(data => alert(JSON.stringify(data)));
-      }
-      toggleRestaurantFavorite(this);
-    });
-  });
 }
 
 function postData(url = ``, data = {}) {

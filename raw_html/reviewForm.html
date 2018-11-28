@@ -19,10 +19,10 @@
 
   <main id="maincontent">
       <form>
-          <label>User name : </label><input id="username-input" type="text" name="user-name"/><br/>
-          <label>Rating (out of 5) : </label><input type="number" id="rating-input" name="rating" min="0" max="5" maxlength="1" size="2"/><br/>
-          <label>Review : </label></br><textarea name="review" id="review-input" rows="5" cols="50"></textarea><br/>
-          <input id="submit-review-button" type="button" value="Submit review"/><input type="reset" value="Reset form"/>
+          <label id="username-label">User name : </label><input id="username-input" aria-labelledby="username-label" type="text" name="user-name"/><br/>
+          <label id="rating-input-label">Rating (out of 5) : </label><input type="number" id="rating-input" aria-labelledby="rating-input-label" name="rating" min="0" max="5" maxlength="1" size="2"/><br/>
+          <label id="review-label">Review : </label></br><textarea name="review" id="review-input" aria-labelledby="review-label" rows="5" cols="50"></textarea><br/>
+          <input id="submit-review-button" class="button" type="button" value="Submit review"/><input type="reset" class="button" value="Reset form"/>
       </form>
   </main>
   <script type="application/javascript" charset="utf-8" src="../js/dbhelper.js" inline></script>
